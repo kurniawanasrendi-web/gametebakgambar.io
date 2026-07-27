@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tebak Gambar Simpel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .score-board {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .image-box {
+            background-color: #eef2f5;
+            border-radius: 12px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            margin-bottom: 20px;
+            user-select: none;
+        }
+
+        .clue {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4A90E2;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #4A90E2;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+
+        .correct { color: #2e7d32; }
+        .wrong { color: #d32f2f; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Tebak Gambar</h1>
+    <div class="score-board">Skor: <span id="score">0</span></div>
+
+    <div class="image-box" id="imageDisplay">❓</div>
+    <div class="clue" id="clueText">Petunjuk akan muncul di sini</div>
+
+    <form id="guessForm" onsubmit="checkAnswer(event)">
+        <input type="text" id="userInput" placeholder="Ketik jawabanmu..." autocomplete="off" required>
+        <button type="submit" id="submitBtn">Jawab</button>
+    </form>
+
+    <div class="feedback" id="feedbackText"></div>
+</div>
+
+<script>
+    // Soal Game (Bisa Kamu Tambahkan Sendiri di Sini)
+    const questions = [
+        { visual: "🥑☕", answer: "jus alpukat", clue: "Minuman segar rasanya gurih" },
+        { visual: "⏰🔔", answer: "jam weker", clue: "Biasa bunyi di pagi hari" },
+        { visual: "🚀🌕", answer: "roket", clue: "Kendaraan luar angkasa" },
+        { visual: "🦁👑", answer: "raja hutan", clue: "Sebutan untuk singa" },
+        { visual: "📚🐛", answer: "kutu buku", clue: "Orang yang suka membaca" },
+        { visual: "🔥🐊", answer: "buaya darat", clue: "Kiasan untuk pria perayu" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+
+    const imageDisplay = document.getElementById("imageDisplay");
+    const clueText = document.getElementById("clueText");
+    const userInput = document.getElementById("userInput");
+    const feedbackText = document.getElementById("feedbackText");
+    const scoreDisplay = document.getElementById("score");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function loadQuestion() {
+        if (currentIndex < questions.length) {
+            const q = questions[currentIndex];
+            imageDisplay.textContent = q.visual;
+            clueText.textContent = "Clue: " + q.clue;
+            userInput.value = "";
+            feedbackText.textContent = "";
+            userInput.disabled = false;
+            submitBtn.textContent = "Jawab";
+        } else {
+            // Game Selesai
+            imageDisplay.textContent = "🏆";
+            clueText.textContent = "Selamat! Kamu menyelesaikan semua soal.";
+            userInput.style.display = "none";
+            submitBtn.textContent = "Main Lagi";
+            submitBtn.onclick = () => location.reload();
+            feedbackText.textContent = `Skor Akhir: ${score} / ${questions.length * 10}`;
+            feedbackText.className = "feedback correct";
+        }
+    }
+
+    function checkAnswer(event) {
+        event.preventDefault();
+
+        if (currentIndex >= questions.length) return;
+
+        const userGuess = userInput.value.trim().toLowerCase();
+        const correctAnswer = questions[currentIndex].answer.toLowerCase();
+
+        if (userGuess === correctAnswer) {
+            score += 10;
+            scoreDisplay.textContent = score;
+            feedbackText.textContent = "🎉 Benar!";
+            feedbackText.className = "feedback correct";
+            
+            userInput.disabled = true;
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 1200);
+        } else {
+            feedbackText.textContent = "❌ Salah, coba lagi!";
+            feedbackText.className = "feedback wrong";
+        }
+    }
+
+    // Jalankan game pertama kali
+    loadQuestion();
+</script>
+
+</body>
+</html>
